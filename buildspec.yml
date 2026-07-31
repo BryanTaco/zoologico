@@ -35,7 +35,7 @@ phases:
                 "Import-Module WebAdministration",
                 "Stop-WebSite -Name 'Default Web Site'",
                 "Remove-Item -Path 'C:/inetpub/wwwroot/*' -Recurse -Force -ErrorAction SilentlyContinue",
-                "aws s3 sync s3://" + bucket + "/zoologico/ C:/inetpub/wwwroot/ --delete",
+                "'C:/Program Files/Amazon/AWSCLIV2/aws.exe' s3 sync s3://" + bucket + "/zoologico/ C:/inetpub/wwwroot/ --delete",
                 "Start-WebSite -Name 'Default Web Site'",
                 "Write-Host 'Despliegue completado exitosamente'"
             ]
