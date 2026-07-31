@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto – Zoológico Nacional Vida Silvestre</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo">
+        <span class="logo-icon">🦁</span>
+        <span>Zoológico Nacional</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="animales.html">Animales</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="educacion.html">Educación</a></li>
+        <li><a href="contacto.html" class="active">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-banner">
+    <h1>📍 Contacto</h1>
+    <p>Estamos aquí para ayudarte. ¡Escríbenos!</p>
+  </div>
+
+  <div class="breadcrumb">
+    <div class="breadcrumb-inner"><a href="index.html">Inicio</a> › Contacto</div>
+  </div>
+
+  <!-- ── Formulario + Info ── -->
+  <section>
+    <div class="container">
+
+      <div class="contact-grid">
+
+        <!-- Formulario de contacto -->
+        <div class="contact-form">
+          <h2>Envíanos un mensaje</h2>
+
+          <form action="#" method="post" onsubmit="handleSubmit(event)">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nombre">Nombre *</label>
+                <input type="text" id="nombre" name="nombre"
+                       placeholder="Tu nombre completo" required maxlength="100">
+              </div>
+              <div class="form-group">
+                <label for="apellido">Apellido *</label>
+                <input type="text" id="apellido" name="apellido"
+                       placeholder="Tu apellido" required maxlength="100">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Correo electrónico *</label>
+              <input type="email" id="email" name="email"
+                     placeholder="tucorreo@ejemplo.com" required>
+            </div>
+
+            <div class="form-group">
+              <label for="telefono">Teléfono</label>
+              <input type="tel" id="telefono" name="telefono"
+                     placeholder="+593 9X XXX XXXX" pattern="[\+]?[0-9\s\-]{7,15}">
+            </div>
+
+            <div class="form-group">
+              <label for="asunto">Asunto *</label>
+              <select id="asunto" name="asunto" required
+                      style="width:100%;padding:0.8rem 1rem;border:2px solid #e0e0e0;border-radius:8px;font-size:0.95rem;font-family:inherit;transition:all 0.3s;">
+                <option value="">Selecciona un asunto...</option>
+                <option value="visita">Planificar una visita</option>
+                <option value="grupos">Reserva grupos / colegios</option>
+                <option value="eventos">Eventos especiales</option>
+                <option value="educacion">Programas educativos</option>
+                <option value="voluntariado">Voluntariado / pasantías</option>
+                <option value="prensa">Prensa y medios</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mensaje">Mensaje *</label>
+              <textarea id="mensaje" name="mensaje"
+                        placeholder="Escribe tu mensaje aquí..." required minlength="10"></textarea>
+            </div>
+
+            <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+              <input type="checkbox" id="terminos" name="terminos" required
+                     style="width:auto;accent-color:var(--primary);">
+              <label for="terminos" style="margin:0;font-weight:400;font-size:0.88rem;color:var(--gray);">
+                Acepto la <a href="#" style="color:var(--primary);">política de privacidad</a> y el tratamiento de mis datos.
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">
+              ✉️ Enviar mensaje
+            </button>
+
+          </form>
+
+          <!-- Mensaje de confirmación -->
+          <div id="confirmacion"
+               style="display:none;background:var(--light-green);border:2px solid var(--primary);border-radius:8px;padding:1.2rem;margin-top:1rem;text-align:center;color:var(--primary);">
+            <strong>✅ ¡Mensaje enviado!</strong><br>
+            <span style="font-size:0.9rem;">Te responderemos en menos de 24 horas hábiles.</span>
+          </div>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="contact-info">
+
+          <!-- Dirección y horarios -->
+          <div class="info-block">
+            <h3>📍 Dónde encontrarnos</h3>
+
+            <div class="info-item">
+              <div class="info-icon">📍</div>
+              <div class="info-text">
+                <h4>Dirección</h4>
+                <p>Av. Simón Bolívar km 5, sector Nayón<br>Quito – Pichincha, Ecuador</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">📞</div>
+              <div class="info-text">
+                <h4>Teléfonos</h4>
+                <p>+593 2 123 4567 (principal)<br>+593 98 765 4321 (WhatsApp)</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">✉️</div>
+              <div class="info-text">
+                <h4>Correo electrónico</h4>
+                <p>info@zoologico.ec<br>educacion@zoologico.ec</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horarios -->
+          <div class="info-block">
+            <h3>🕘 Horarios de atención</h3>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.9rem;">
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="color:var(--gray);">Lunes</span>
+                <span style="color:#e53935;font-weight:600;">Cerrado</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="color:var(--gray);">Martes – Jueves</span>
+                <span style="font-weight:600;">09:00 – 17:00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="color:var(--gray);">Viernes</span>
+                <span style="font-weight:600;">09:00 – 17:00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+                <span style="color:var(--gray);">Sábado – Domingo</span>
+                <span style="font-weight:600;">08:00 – 18:00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding:0.4rem 0;">
+                <span style="color:var(--gray);">Feriados</span>
+                <span style="font-weight:600;">08:00 – 18:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Redes sociales -->
+          <div class="info-block">
+            <h3>📱 Síguenos en redes sociales</h3>
+            <div class="social-links">
+              <a href="#" class="social-link">📘 Facebook</a>
+              <a href="#" class="social-link">📸 Instagram</a>
+              <a href="#" class="social-link">🐦 Twitter</a>
+              <a href="#" class="social-link">▶️ YouTube</a>
+              <a href="#" class="social-link">💬 WhatsApp</a>
+              <a href="#" class="social-link">🎵 TikTok</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Mapa de ubicación ── -->
+  <section style="padding:0 2rem 4rem;">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom:1.5rem;">Ubicación del Zoológico</h2>
+      <div class="map-container">
+        <iframe
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-78.4750%2C-0.2200%2C-78.4000%2C-0.1600&layer=mapnik&marker=-0.1900,-78.4380"
+          width="100%"
+          height="380"
+          style="border:0;"
+          title="Mapa de ubicación del Zoológico Nacional Vida Silvestre"
+          loading="lazy">
+        </iframe>
+      </div>
+      <p style="text-align:center;color:var(--gray);font-size:0.85rem;margin-top:0.8rem;">
+        📍 Av. Simón Bolívar km 5, Nayón, Quito – Ecuador
+        · <a href="https://maps.openstreetmap.org/?q=-0.19,-78.438" target="_blank" rel="noopener" style="color:var(--primary);">Ver mapa completo</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Cómo llegar ── -->
+  <section style="background:var(--light-green);padding-top:0;">
+    <div class="container" style="padding-top:4rem;">
+      <h2 class="section-title">¿Cómo llegar?</h2>
+      <div class="grid-3">
+        <div style="background:white;border-radius:var(--radius);padding:1.8rem;box-shadow:var(--shadow);text-align:center;">
+          <div style="font-size:3rem;margin-bottom:0.8rem;">🚗</div>
+          <h3 style="color:var(--primary);margin-bottom:0.6rem;">En auto</h3>
+          <p style="color:var(--gray);font-size:0.88rem;">Toma la Av. Simón Bolívar en dirección norte. Al llegar a Nayón, sigue las señales del zoológico. Contamos con parqueadero gratuito para 200 vehículos.</p>
+        </div>
+        <div style="background:white;border-radius:var(--radius);padding:1.8rem;box-shadow:var(--shadow);text-align:center;">
+          <div style="font-size:3rem;margin-bottom:0.8rem;">🚌</div>
+          <h3 style="color:var(--primary);margin-bottom:0.6rem;">En transporte público</h3>
+          <p style="color:var(--gray);font-size:0.88rem;">Toma la línea de trolebús o Ecovía hasta la estación "La Y". Desde allí, toma el bus interparroquial hacia Nayón. Bájate en la parada "Zoológico".</p>
+        </div>
+        <div style="background:white;border-radius:var(--radius);padding:1.8rem;box-shadow:var(--shadow);text-align:center;">
+          <div style="font-size:3rem;margin-bottom:0.8rem;">🚕</div>
+          <h3 style="color:var(--primary);margin-bottom:0.6rem;">En taxi / aplicación</h3>
+          <p style="color:var(--gray);font-size:0.88rem;">Solicita un taxi o InDriver / Cabify al "Zoológico Nacional Nayón". El viaje desde el centro histórico demora aproximadamente 25 minutos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="logo-icon">🦁</span><span>Zoológico Nacional</span></div>
+        <p>Un espacio dedicado a la conservación, educación y conciencia ambiental desde 1993.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Secciones</h4>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="animales.html">Animales</a></li>
+          <li><a href="servicios.html">Servicios</a></li>
+          <li><a href="educacion.html">Educación</a></li>
+          <li><a href="contacto.html">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Horarios</h4>
+        <ul>
+          <li><a href="#">Mar – Vie: 9:00 – 17:00</a></li>
+          <li><a href="#">Sáb – Dom: 8:00 – 18:00</a></li>
+          <li><a href="#">Lunes: Cerrado</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="#">📍 Av. Simón Bolívar km 5, Quito</a></li>
+          <li><a href="#">📞 +593 2 123 4567</a></li>
+          <li><a href="#">✉️ info@zoologico.ec</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Zoológico Nacional Vida Silvestre · Ecuador.</p>
+    </div>
+  </footer>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      document.getElementById('confirmacion').style.display = 'block';
+      e.target.reset();
+      document.getElementById('confirmacion').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

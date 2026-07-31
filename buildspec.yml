@@ -1,0 +1,165 @@
+# =================================================================
+# buildspec.yml – Zoológico Nacional Vida Silvestre
+# Pipeline CI/CD: GitHub → CodePipeline → CodeBuild → IIS (SSM)
+#
+# Flujo:
+#   1. CodePipeline detecta el push en GitHub (etapa Source)
+#   2. CodeBuild ejecuta este archivo (etapa Build)
+#   3. Los archivos del sitio se sincronizan con S3
+#   4. Se envía un SSM Run Command al servidor Windows con IIS
+#   5. El servidor descarga los archivos y reinicia el sitio web
+#
+# Prerrequisitos en AWS:
+#   - Parámetro en SSM Parameter Store: /zoologico/iis-instance-id
+#   - Parámetro en SSM Parameter Store: /zoologico/deployment-bucket
+#   - EC2 Windows con IIS, SSM Agent instalado y rol IAM con AmazonS3ReadOnlyAccess
+#   - Rol de CodeBuild con permisos: ssm:SendCommand, ssm:GetCommandInvocation,
+#     s3:PutObject, s3:Sync, ec2:DescribeInstances
+# =================================================================
+
+version: 0.2
+
+env:
+  parameter-store:
+    INSTANCE_ID:   /zoologico/iis-instance-id
+    BUCKET_NAME:   /zoologico/deployment-bucket
+
+phases:
+
+  # ── 1. Instalación ──────────────────────────────────────────
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo "Verificando herramientas disponibles..."
+      - aws --version
+      - python --version
+
+  # ── 2. Pre-build ────────────────────────────────────────────
+  pre_build:
+    commands:
+      - echo "============================================"
+      - echo " PIPELINE CI/CD - ZOOLOGICO NACIONAL"
+      - echo "============================================"
+      - echo "Fecha y hora     : $(date '+%Y-%m-%d %H:%M:%S')"
+      - echo "Commit ID        : $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - echo "Build ID         : $CODEBUILD_BUILD_ID"
+      - echo "Instancia IIS    : $INSTANCE_ID"
+      - echo "Bucket S3        : $BUCKET_NAME"
+      - echo "Verificando credenciales AWS..."
+      - aws sts get-caller-identity
+
+  # ── 3. Build / Despliegue ───────────────────────────────────
+  build:
+    commands:
+      - echo "--------------------------------------------"
+      - echo "PASO 1: Sincronizando archivos con S3"
+      - echo "--------------------------------------------"
+      - |
+        aws s3 sync . "s3://$BUCKET_NAME/zoologico/" \
+          --delete \
+          --exclude "buildspec.yml" \
+          --exclude ".git/*" \
+          --exclude "*.md" \
+          --exclude ".gitignore"
+      - echo "Archivos sincronizados exitosamente en S3."
+
+      - echo "--------------------------------------------"
+      - echo "PASO 2: Enviando comando al servidor IIS"
+      - echo "--------------------------------------------"
+      - |
+        # Construimos el script PowerShell que se ejecutará en el servidor Windows
+        COMMAND_ID=$(aws ssm send-command \
+          --instance-ids "$INSTANCE_ID" \
+          --document-name "AWS-RunPowerShellScript" \
+          --comment "Deploy automatico Zoologico - Commit $CODEBUILD_RESOLVED_SOURCE_VERSION" \
+          --timeout-seconds 300 \
+          --parameters "commands=[
+            \"Write-Host '=== ACTUALIZACION AUTOMATICA DEL ZOOLOGICO ===' -ForegroundColor Green\",
+            \"Write-Host 'Fecha: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\",
+            \"Import-Module WebAdministration -ErrorAction SilentlyContinue\",
+            \"Write-Host 'Deteniendo sitio IIS...'\",
+            \"Stop-WebSite -Name 'Default Web Site'\",
+            \"Write-Host 'Limpiando directorio wwwroot...'\",
+            \"Remove-Item -Path 'C:\\\\inetpub\\\\wwwroot\\\\*' -Recurse -Force -ErrorAction SilentlyContinue\",
+            \"Write-Host 'Descargando archivos desde S3...'\",
+            \"Read-S3Object -BucketName '$BUCKET_NAME' -KeyPrefix 'zoologico/' -Folder 'C:\\\\inetpub\\\\wwwroot'\",
+            \"Write-Host 'Iniciando sitio IIS...'\",
+            \"Start-WebSite -Name 'Default Web Site'\",
+            \"Write-Host 'Estado actual del sitio:'\",
+            \"Get-WebSiteState -Name 'Default Web Site'\",
+            \"Write-Host '=== ACTUALIZACION COMPLETADA EXITOSAMENTE ===' -ForegroundColor Green\"
+          ]" \
+          --query "Command.CommandId" \
+          --output text)
+      - echo "Comando SSM enviado. ID: $COMMAND_ID"
+
+      - echo "--------------------------------------------"
+      - echo "PASO 3: Esperando respuesta del servidor"
+      - echo "--------------------------------------------"
+      - |
+        MAX_ATTEMPTS=30   # 30 intentos × 10 seg = 5 minutos de espera máxima
+        ATTEMPT=0
+        STATUS="Pending"
+
+        while [ "$STATUS" = "Pending" ] || [ "$STATUS" = "InProgress" ]; do
+          sleep 10
+          ATTEMPT=$((ATTEMPT + 1))
+
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "Status" \
+            --output text 2>/dev/null || echo "Pending")
+
+          echo "  Intento $ATTEMPT/$MAX_ATTEMPTS - Estado: $STATUS"
+
+          if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
+            echo "ERROR: Timeout - El servidor no respondio en 5 minutos."
+            exit 1
+          fi
+        done
+
+      - |
+        # Verificar resultado final
+        if [ "$STATUS" = "Success" ]; then
+          echo ""
+          echo "============================================"
+          echo " DESPLIEGUE EXITOSO"
+          echo "============================================"
+          # Mostrar output del servidor
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text
+        else
+          echo ""
+          echo "============================================"
+          echo " ERROR EN EL DESPLIEGUE (Estado: $STATUS)"
+          echo "============================================"
+          echo "Detalle del error:"
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "StandardErrorContent" \
+            --output text
+          exit 1
+        fi
+
+  # ── 4. Post-build ───────────────────────────────────────────
+  post_build:
+    commands:
+      - echo "============================================"
+      - echo " PIPELINE FINALIZADO: $(date '+%Y-%m-%d %H:%M:%S')"
+      - echo " Sitio web actualizado correctamente."
+      - echo "============================================"
+
+# ── Artefactos (guardados en S3 por CodePipeline) ────────────
+artifacts:
+  files:
+    - "**/*"
+  exclude-paths:
+    - buildspec.yml
+    - .git/**
+  name: zoologico-$(date +%Y%m%d)-artifact
