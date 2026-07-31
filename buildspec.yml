@@ -75,20 +75,17 @@ phases:
           --comment "Deploy automatico Zoologico - Commit $CODEBUILD_RESOLVED_SOURCE_VERSION" \
           --timeout-seconds 300 \
           --parameters "commands=[
-            \"Write-Host '=== ACTUALIZACION AUTOMATICA DEL ZOOLOGICO ===' -ForegroundColor Green\",
-            \"Write-Host 'Fecha: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')\",
-            \"Import-Module WebAdministration -ErrorAction SilentlyContinue\",
+            \"Write-Host '=== ACTUALIZACION AUTOMATICA DEL ZOOLOGICO ==='\",
+            \"Write-Host ('Fecha: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))\",
             \"Write-Host 'Deteniendo sitio IIS...'\",
             \"Stop-WebSite -Name 'Default Web Site'\",
             \"Write-Host 'Limpiando directorio wwwroot...'\",
             \"Remove-Item -Path 'C:\\\\inetpub\\\\wwwroot\\\\*' -Recurse -Force -ErrorAction SilentlyContinue\",
             \"Write-Host 'Descargando archivos desde S3...'\",
-            \"Read-S3Object -BucketName '$BUCKET_NAME' -KeyPrefix 'zoologico/' -Folder 'C:\\\\inetpub\\\\wwwroot'\",
+            \"aws s3 sync s3://$BUCKET_NAME/zoologico/ C:\\\\inetpub\\\\wwwroot\\\\ --delete\",
             \"Write-Host 'Iniciando sitio IIS...'\",
             \"Start-WebSite -Name 'Default Web Site'\",
-            \"Write-Host 'Estado actual del sitio:'\",
-            \"Get-WebSiteState -Name 'Default Web Site'\",
-            \"Write-Host '=== ACTUALIZACION COMPLETADA EXITOSAMENTE ===' -ForegroundColor Green\"
+            \"Write-Host '=== ACTUALIZACION COMPLETADA EXITOSAMENTE ==='\"
           ]" \
           --query "Command.CommandId" \
           --output text)
