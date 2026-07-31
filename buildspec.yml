@@ -25,20 +25,25 @@ phases:
       - aws s3 sync . s3://$BUCKET_NAME/zoologico/ --delete --exclude "buildspec.yml" --exclude ".git/*"
       - echo "Archivos subidos a S3 exitosamente"
 
-      - echo "=== PASO 2 - Preparando comando SSM ==="
+      - echo "=== PASO 2 - Generando parametros SSM con Python ==="
       - |
-        cat > /tmp/ssm-commands.json << EOF
-        {
-          "commands": [
-            "Import-Module WebAdministration",
-            "Stop-WebSite -Name \"Default Web Site\"",
-            "Remove-Item -Path C:\\inetpub\\wwwroot\\* -Recurse -Force -ErrorAction SilentlyContinue",
-            "aws s3 sync s3://$BUCKET_NAME/zoologico/ C:\\inetpub\\wwwroot\\ --delete",
-            "Start-WebSite -Name \"Default Web Site\"",
-            "Write-Host Despliegue completado exitosamente"
-          ]
+        python3 << PYEOF
+        import json, os
+        bucket = os.environ['BUCKET_NAME']
+        params = {
+            "commands": [
+                "Import-Module WebAdministration",
+                "Stop-WebSite -Name 'Default Web Site'",
+                "Remove-Item -Path 'C:/inetpub/wwwroot/*' -Recurse -Force -ErrorAction SilentlyContinue",
+                "aws s3 sync s3://" + bucket + "/zoologico/ C:/inetpub/wwwroot/ --delete",
+                "Start-WebSite -Name 'Default Web Site'",
+                "Write-Host 'Despliegue completado exitosamente'"
+            ]
         }
-        EOF
+        with open('/tmp/ssm-commands.json', 'w') as f:
+            json.dump(params, f)
+        print("JSON generado correctamente")
+        PYEOF
 
       - echo "=== PASO 3 - Enviando comando al servidor IIS ==="
       - |
